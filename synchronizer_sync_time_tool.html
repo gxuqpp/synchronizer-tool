@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>同步器同步时间计算工具 · 式(3-30) · 式(3-31) · 汽车设计第3章</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#1a5fa8;--blue2:#2e7dd1;--blue3:#5ba3e0;
+  --blue-lt:#e8f2fc;--blue-bg:#f0f6fd;
+  --green:#1a7a3c;--green-lt:#e6f5ec;
+  --red:#c0392b;--red-lt:#fdecea;
+  --orange:#c55a11;--orange-lt:#fdf3e6;
+  --amber:#d4a017;--amber-lt:#fef9e7;
+  --g1:#1c2b3a;--g2:#374a5c;--g3:#5a6e82;--g4:#8fa3b5;
+  --g5:#c8d6e0;--g6:#e8eff4;--g7:#f5f8fb;
+  --bg:#ecf2f8;--card:#fff;
+  --r:10px;--sh:0 2px 14px rgba(0,0,0,.09)
+}
+body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);
+  color:var(--g1);min-height:100vh;padding:18px 14px 44px;font-size:14px;line-height:1.6}
+.wrap{max-width:1020px;margin:0 auto}
+
+/* header */
+.hdr{background:linear-gradient(135deg,#1a3a5c 0%,#1a5fa8 100%);color:#fff;
+  border-radius:var(--r);padding:20px 26px 16px;margin-bottom:16px;box-shadow:var(--sh)}
+.hdr h1{font-size:19px;font-weight:700;margin-bottom:3px}
+.hdr p{font-size:12.5px;opacity:.85}
+.hdr .tag{display:inline-block;background:rgba(255,255,255,.18);border-radius:4px;
+  padding:2px 9px;font-size:11.5px;margin-top:6px}
+
+/* formula strip */
+.fstrip{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.fcard{flex:1;min-width:280px;background:var(--card);border-radius:var(--r);
+  padding:16px 20px;box-shadow:var(--sh);border-top:3px solid var(--blue)}
+.fcard h4{font-size:12.5px;color:var(--blue);font-weight:700;margin-bottom:8px}
+.fcard .feq{font-size:15px;font-weight:700;color:var(--g1);text-align:center;
+  padding:8px 0;line-height:1.8}
+.fcard .feq i{font-style:italic}
+.fcard .fdesc{font-size:11.5px;color:var(--g3);margin-top:8px;padding-top:8px;border-top:1px solid var(--g6)}
+
+/* layout */
+.cols{display:grid;grid-template-columns:360px 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:780px){.cols{grid-template-columns:1fr}}
+
+/* card */
+.card{background:var(--card);border-radius:var(--r);padding:18px;box-shadow:var(--sh)}
+.card-h{font-size:13px;font-weight:700;color:var(--g2);margin-bottom:14px;
+  padding-bottom:8px;border-bottom:2px solid var(--blue-lt);
+  display:flex;align-items:center;gap:6px}
+.icon-n{width:21px;height:21px;border-radius:50%;background:var(--blue);color:#fff;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;flex-shrink:0}
+
+/* param row */
+.pr{margin-bottom:15px}.pr:last-child{margin-bottom:0}
+.pl{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.pname{font-size:13px;color:var(--g2);font-weight:600}
+.pval{font-size:16px;font-weight:700;color:var(--blue)}
+.punit{font-size:11px;color:var(--g4);margin-left:2px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;
+  background:var(--g5);border-radius:3px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+  width:18px;height:18px;border-radius:50%;background:var(--blue);border:2.5px solid #fff;
+  box-shadow:0 1px 4px rgba(0,0,0,.22);cursor:pointer;transition:transform .15s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+.sticks{display:flex;justify-content:space-between;font-size:10px;color:var(--g4);margin-top:2px}
+.pdesc{font-size:11.5px;color:var(--g4);margin-top:2px}
+
+/* result panel */
+.rpanel{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);
+  overflow:hidden;margin-bottom:14px}
+.rh{background:linear-gradient(90deg,#1a3a5c,#1a5fa8);color:#fff;
+  padding:13px 20px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px}
+.rb{padding:18px 20px}
+
+/* key nums grid */
+.knums{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+@media(max-width:520px){.knums{grid-template-columns:1fr 1fr}}
+.knum{background:var(--g7);border-radius:8px;padding:11px 8px;text-align:center}
+.knum .kl{font-size:11px;color:var(--g3);margin-bottom:3px}
+.knum .kv{font-size:21px;font-weight:700;color:var(--blue)}
+.knum .ku{font-size:11px;color:var(--g4)}
+
+/* verdict */
+.verdict{border-radius:8px;padding:13px 16px;display:flex;align-items:center;
+  gap:11px;margin-bottom:14px;font-weight:600}
+.verdict.pass{background:var(--green-lt);border:1.5px solid var(--green);color:var(--green)}
+.verdict.warn{background:var(--amber-lt);border:1.5px solid var(--amber);color:#8a6000}
+.verdict.fail{background:var(--red-lt);border:1.5px solid var(--red);color:var(--red)}
+.verdict .vi{font-size:26px;flex-shrink:0}
+.verdict .vt{font-size:13.5px;line-height:1.45}
+.verdict .vt b{font-size:15px}
+
+/* process box */
+.proc{background:var(--g7);border-radius:8px;padding:13px 16px;font-size:12.5px}
+.proc .ph{font-weight:700;color:var(--g2);margin-bottom:9px;font-size:13px}
+.proc-grid{display:grid;grid-template-columns:1fr auto;gap:4px 14px;align-items:baseline}
+.proc-grid .eq{color:var(--g2)}
+.proc-grid .res{text-align:right;font-weight:700;color:var(--blue)}
+.proc-grid .hl{color:var(--orange);font-weight:700}
+
+/* gauge bar */
+.gauge-wrap{margin-bottom:14px}
+.gauge-label{display:flex;justify-content:space-between;font-size:12px;
+  color:var(--g3);margin-bottom:5px}
+.gauge-bg{height:22px;background:var(--g6);border-radius:11px;position:relative;overflow:hidden}
+.gauge-fill{height:100%;border-radius:11px;transition:width .45s ease,background .45s ease;
+  display:flex;align-items:center;justify-content:flex-end;padding-right:8px;
+  font-size:11px;font-weight:700;color:#fff;white-space:nowrap}
+.gauge-ref{position:absolute;top:0;height:100%;width:2.5px;background:rgba(0,0,0,.25)}
+.gauge-ref-label{position:absolute;top:-18px;transform:translateX(-50%);
+  font-size:10px;white-space:nowrap}
+
+/* chart area */
+.chart-card{background:var(--card);border-radius:var(--r);padding:18px;
+  box-shadow:var(--sh);margin-bottom:14px}
+.chart-card h3{font-size:13px;font-weight:700;color:var(--g2);margin-bottom:12px;
+  padding-bottom:7px;border-bottom:2px solid var(--blue-lt)}
+.tabs{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:12px}
+.tab{padding:5px 13px;font-size:12px;border-radius:6px 6px 0 0;cursor:pointer;
+  border:1.5px solid var(--g5);background:var(--g7);color:var(--g3);
+  font-weight:600;border-bottom:none;transition:.18s}
+.tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+canvas{display:block;width:100%!important}
+.chart-note{text-align:center;font-size:11.5px;color:var(--g4);margin-top:7px}
+
+/* table */
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl th{background:var(--blue);color:#fff;padding:8px 9px;text-align:center;font-weight:600}
+.tbl td{padding:7px 9px;border-bottom:1px solid var(--g6);text-align:center}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:nth-child(even) td{background:var(--g7)}
+.tbl td.pass{color:var(--green);font-weight:700}
+.tbl td.warn{color:#8a6000;font-weight:700}
+.tbl td.fail{color:var(--red);font-weight:700}
+.tbl td.cur{background:#fff8e1!important;font-weight:700}
+
+.footer{text-align:center;font-size:11.5px;color:var(--g4);margin-top:8px;
+  padding-top:10px;border-top:1px solid var(--g5)}
+
+/* alert strip */
+.alert{border-radius:8px;padding:11px 15px;font-size:12.5px;margin-bottom:14px}
+.alert.info{background:var(--blue-lt);border:1px solid #a0c8f0;color:#1a3a5c}
+.alert.info b{color:var(--blue)}
+user-select: none
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- Header -->
+<div class="hdr">
+  <h1>⏱ 同步器同步时间计算工具</h1>
+  <p>基于《汽车设计》第6版 第三章 · 式(3-30) 同步力矩 · 式(3-31) 同步时间 · 乘用车3→4档升档工况</p>
+  <span class="tag">离线版 · 无需联网 · 全参数实时交互</span>
+</div>
+
+<!-- Formula strip -->
+<div class="fstrip">
+  <div class="fcard">
+    <h4>📐 式(3-30) 同步力矩</h4>
+    <div class="feq">
+      <i>M<sub>m</sub></i> =
+      <span style="display:inline-block;text-align:center;vertical-align:middle;margin:0 4px">
+        <span style="display:block;border-bottom:1.8px solid #374a5c;padding:0 4px 2px"><i>FfR</i></span>
+        <span style="display:block;padding:2px 4px 0">sin<i>α</i></span>
+      </span>
+    </div>
+    <div class="fdesc">F—轴向力(N)，f—摩擦因数，R—锥面平均半径(mm)，α—半锥角(°)</div>
+  </div>
+  <div class="fcard">
+    <h4>📐 式(3-31) 同步时间</h4>
+    <div class="feq" style="font-size:13px">
+      <i>t</i> =
+      <span style="display:inline-block;text-align:center;vertical-align:middle;margin:0 4px">
+        <span style="display:block;border-bottom:1.8px solid #374a5c;padding:0 2px 2px"><i>J<sub>t</sub></i>·<i>ω<sub>e</sub></i>·sin<i>α</i></span>
+        <span style="display:block;padding:2px 2px 0"><i>FfR</i></span>
+      </span>
+      ·
+      <span style="display:inline-block;text-align:center;vertical-align:middle;margin:0 4px">
+        <span style="display:block;border-bottom:1.8px solid #374a5c;padding:0 2px 2px">1</span>
+        <span style="display:block;padding:2px 2px 0"><i>i</i><sub>k+1</sub></span>
+      </span>
+      −
+      <span style="display:inline-block;text-align:center;vertical-align:middle;margin:0 4px">
+        <span style="display:block;border-bottom:1.8px solid #374a5c;padding:0 2px 2px">1</span>
+        <span style="display:block;padding:2px 2px 0"><i>i</i><sub>k</sub></span>
+      </span>
+    </div>
+    <div class="fdesc">J<sub>t</sub>—转动惯量(kg·m²)，ω<sub>e</sub>—发动机角速度(rad/s)，i<sub>k</sub>—当前档传动比，i<sub>k+1</sub>—目标档传动比</div>
+  </div>
+</div>
+
+<!-- Info -->
+<div class="alert info">
+  <b>💡 使用说明：</b>拖动滑块实时改变参数，观察同步时间 <b>t</b> 的变化。
+  乘用车高档许用范围：<b>0.15 ~ 0.30 s</b>；低档：0.50 ~ 0.80 s。
+  图表区可切换查看各参数对 t 的影响规律曲线。
+</div>
+
+<!-- Two column layout -->
+<div class="cols">
+
+  <!-- Left: Inputs -->
+  <div class="card">
+    <div class="card-h"><span class="icon-n">1</span>输入参数调节</div>
+
+    <div class="pr">
+      <div class="pl">
+        <span class="pname">转动惯量 <i>J<sub>t</sub></i></span>
+        <span class="pval"><span id="v_Jt">0.035</span><span class="punit">kg·m²</span></span>
+      </div>
+      <input type="range" id="s_Jt" min="0.010" max="0.100" step="0.001" value="0.035"
+        oninput="sync('Jt',this.value)">
+      <div class="sticks"><span>0.010</span><span>0.035</span><span>0.060</span><span>0.100</span></div>
+      <div class="pdesc">含离合器从动盘、第一轴及相关齿轮的折算惯量</div>
+    </div>
+
+    <div class="pr">
+      <div class="pl">
+        <span class="pname">发动机转速 <i>n<sub>e</sub></i></span>
+        <span class="pval"><span id="v_ne">2500</span><span class="punit">rpm</span></span>
+      </div>
+      <input type="range" id="s_ne" min="800" max="5000" step="50" value="2500"
+        oninput="sync('ne',this.value)">
+      <div class="sticks"><span>800</span><span>2000</span><span>3500</span><span>5000</span></div>
+      <div class="pdesc">ω<sub>e</sub> = n<sub>e</sub>×2π/60，当前 ω<sub>e</sub> = <span id="v_we">261.8</span> rad/s</div>
+    </div>
+
+    <div class="pr" style="border-top:1.5px dashed var(--g5);padding-top:13px;margin-top:4px">
+      <div class="pl">
+        <span class="pname" style="color:var(--g2)">当前档传动比 <i>i<sub>k</sub></i>（3档）</span>
+        <span class="pval"><span id="v_ik">1.65</span></span>
+      </div>
+      <input type="range" id="s_ik" min="1.0" max="4.0" step="0.05" value="1.65"
+        oninput="sync('ik',this.value)">
+      <div class="sticks"><span>1.0</span><span>2.0</span><span>3.0</span><span>4.0</span></div>
+      <div class="pdesc">升档前所在档位的传动比</div>
+    </div>
+
+    <div class="pr">
+      <div class="pl">
+        <span class="pname" style="color:var(--g2)">目标档传动比 <i>i<sub>k+1</sub></i>（4档）</span>
+        <span class="pval"><span id="v_ik1">1.10</span></span>
+      </div>
+      <input type="range" id="s_ik1" min="0.6" max="3.5" step="0.05" value="1.10"
+        oninput="sync('ik1',this.value)">
+      <div class="sticks"><span>0.6</span><span>1.5</span><span>2.5</span><span>3.5</span></div>
+      <div class="pdesc">升档后目标档位的传动比（须 < i<sub>k</sub> 才为升档）</div>
+    </div>
+
+    <div class="pr" style="border-top:1.5px dashed var(--g5);padding-top:13px;margin-top:4px">
+      <div class="pl">
+        <span class="pname">轴向力 <i>F</i></span>
+        <span class="pval"><span id="v_F">120</span><span class="punit">N</span></span>
+      </div>
+      <input type="range" id="s_F" min="30" max="400" step="5" value="120"
+        oninput="sync('F',this.value)">
+      <div class="sticks"><span>30</span><span>120</span><span>250</span><span>400</span></div>
+      <div class="pdesc">乘用车/客车取60N换算；增大F可缩短同步时间</div>
+    </div>
+
+    <div class="pr">
+      <div class="pl">
+        <span class="pname">摩擦因数 <i>f</i></span>
+        <span class="pval"><span id="v_f">0.10</span></span>
+      </div>
+      <input type="range" id="s_f" min="0.05" max="0.20" step="0.005" value="0.10"
+        oninput="sync('f',this.value)">
+      <div class="sticks"><span>0.05</span><span>0.10</span><span>0.15</span><span>0.20</span></div>
+      <div class="pdesc">铜基粉末冶金: 0.10~0.13；磨损后可降至0.07</div>
+    </div>
+
+    <div class="pr">
+      <div class="pl">
+        <span class="pname">锥面平均半径 <i>R</i></span>
+        <span class="pval"><span id="v_R">25</span><span class="punit">mm</span></span>
+      </div>
+      <input type="range" id="s_R" min="10" max="60" step="1" value="25"
+        oninput="sync('R',this.value)">
+      <div class="sticks"><span>10</span><span>25</span><span>40</span><span>60</span></div>
+      <div class="pdesc">增大R可提高Mm，缩短同步时间</div>
+    </div>
+
+    <div class="pr">
+      <div class="pl">
+        <span class="pname">半锥角 <i>α</i></span>
+        <span class="pval"><span id="v_alpha">7</span><span class="punit">°</span></span>
+      </div>
+      <input type="range" id="s_alpha" min="5" max="15" step="0.5" value="7"
+        oninput="sync('alpha',this.value)">
+      <div class="sticks"><span>5°</span><span>7°</span><span>10°</span><span>15°</span></div>
+      <div class="pdesc">α 越小则 sinα 越小，Mm 越大，t 越短（但接近自锁危险）</div>
+    </div>
+  </div>
+
+  <!-- Right: Results -->
+  <div>
+    <div class="rpanel">
+      <div class="rh">📊 实时计算结果</div>
+      <div class="rb">
+
+        <!-- Key numbers -->
+        <div class="knums">
+          <div class="knum">
+            <div class="kl">同步力矩 M<sub>m</sub></div>
+            <div class="kv" id="r_Mm">—</div>
+            <div class="ku">N·m</div>
+          </div>
+          <div class="knum">
+            <div class="kl">角速度差 Δω</div>
+            <div class="kv" id="r_dw">—</div>
+            <div class="ku">rad/s</div>
+          </div>
+          <div class="knum" style="border:2px solid var(--blue)">
+            <div class="kl" style="font-weight:700;color:var(--blue)">同步时间 t</div>
+            <div class="kv" id="r_t" style="font-size:26px">—</div>
+            <div class="ku" style="font-weight:700">s</div>
+          </div>
+          <div class="knum">
+            <div class="kl">ω<sub>e</sub> (rad/s)</div>
+            <div class="kv" id="r_we">—</div>
+            <div class="ku">rad/s</div>
+          </div>
+          <div class="knum">
+            <div class="kl">升档方向</div>
+            <div class="kv" id="r_dir" style="font-size:16px">—</div>
+            <div class="ku">—</div>
+          </div>
+          <div class="knum">
+            <div class="kl">相对裕度</div>
+            <div class="kv" id="r_margin">—</div>
+            <div class="ku">%</div>
+          </div>
+        </div>
+
+        <!-- Verdict -->
+        <div class="verdict" id="verdict">
+          <div class="vi" id="v_icon">—</div>
+          <div class="vt" id="v_text">请调整参数</div>
+        </div>
+
+        <!-- Gauge: t vs range 0~1s -->
+        <div class="gauge-wrap">
+          <div class="gauge-label">
+            <span>t = 0 s</span>
+            <span id="g_label">同步时间可视化（许用范围 0.15~0.30 s）</span>
+            <span>1.5 s</span>
+          </div>
+          <div class="gauge-bg" id="gauge_bg">
+            <div class="gauge-fill" id="gauge_fill"></div>
+            <!-- ref marks -->
+            <div class="gauge-ref" style="left:10%" id="ref_lo">
+              <div class="gauge-ref-label" style="color:var(--green)">0.15s</div>
+            </div>
+            <div class="gauge-ref" style="left:20%" id="ref_hi">
+              <div class="gauge-ref-label" style="color:var(--green)">0.30s</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--g4);margin-top:3px">
+            <span style="color:var(--green)">▏ 0.15s &nbsp;▏ 0.30s（乘用车高档许用上限）</span>
+            <span>█ = 当前同步时间 t</span>
+          </div>
+        </div>
+
+        <!-- Process derivation -->
+        <div class="proc">
+          <div class="ph">逐步推导过程</div>
+          <div class="proc-grid" id="proc_grid">
+            <span>加载中…</span><span></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chart -->
+<div class="chart-card">
+  <h3>📈 参数影响规律分析图</h3>
+  <div class="tabs" id="tabRow"></div>
+  <canvas id="mainChart" height="270"></canvas>
+  <div class="chart-note" id="chartNote"></div>
+</div>
+
+<!-- Sensitivity table -->
+<div class="card" style="margin-bottom:14px">
+  <div class="card-h"><span class="icon-n">2</span>同步时间对比表（改变单一参数，其余取当前值）</div>
+  <div style="overflow-x:auto">
+    <table class="tbl" id="sensTable">
+      <thead>
+        <tr>
+          <th>参数</th><th>变化值</th>
+          <th>M<sub>m</sub> (N·m)</th>
+          <th>Δω (rad/s)</th>
+          <th>同步时间 t (s)</th>
+          <th>判断</th>
+        </tr>
+      </thead>
+      <tbody id="sensBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="footer">
+  《汽车设计》第5版 · 闵海涛 王建华 编著 · 第三章 机械式变速器设计<br>
+  式(3-30) 同步力矩 · 式(3-31) 同步时间 · 乘用车高档许用范围 0.15~0.30 s
+</div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+var P = { Jt:0.035, ne:2500, ik:1.65, ik1:1.10, F:120, f:0.10, R:25, alpha:7 };
+var TAB = 0;
+
+// ── Slider sync ────────────────────────────────────────────────────────────
+var FMT = { Jt:3, ne:0, ik:2, ik1:2, F:0, f:3, R:0, alpha:1 };
+function sync(k, v) {
+  P[k] = parseFloat(v);
+  var dp = FMT[k];
+  document.getElementById('v_'+k).textContent = parseFloat(v).toFixed(dp);
+  if (k==='ne') {
+    var we = P.ne * 2 * Math.PI / 60;
+    document.getElementById('v_we').textContent = we.toFixed(1);
+  }
+  compute();
+}
+
+// ── Core formulas ──────────────────────────────────────────────────────────
+function calcAll(p) {
+  var we   = p.ne * 2 * Math.PI / 60;                          // rad/s
+  var sinA = Math.sin(p.alpha * Math.PI / 180);
+  var Mm   = (p.F * p.f * p.R / 1000) / sinA;                 // N·m  (R mm→m)
+  var dw   = we * (1/p.ik1 - 1/p.ik);                         // rad/s (upgrade: dw>0)
+  // t = Jt·we·sinA / (F·f·R/1000) · (1/ik1 - 1/ik)
+  // which equals Jt·dw / Mm
+  var t    = (p.Jt * we * sinA) / (p.F * p.f * p.R / 1000) * (1/p.ik1 - 1/p.ik);
+  return { we:we, sinA:sinA, Mm:Mm, dw:dw, t:t };
+}
+
+// ── Verdict helpers ────────────────────────────────────────────────────────
+var PASS_LO=0.15, PASS_HI=0.30;
+function verdict(t) {
+  if (t<0) return {cls:'fail', icon:'⚠️', msg:'传动比设置有误（i<sub>k+1</sub> ≥ i<sub>k</sub>，非升档工况），请确认档位传动比。'};
+  if (t<=PASS_HI && t>=PASS_LO) return {cls:'pass', icon:'✅', msg:'<b>满足许用范围！</b>同步时间 t = '+t.toFixed(3)+' s，处于乘用车高档许用范围 0.15~0.30 s 内，换档品质良好。'};
+  if (t<PASS_LO) return {cls:'warn', icon:'⚡', msg:'<b>同步时间偏短（t = '+t.toFixed(3)+' s < 0.15 s）</b>，可能导致换档力过大或冲击，建议减小 F 或增大 R。'};
+  return {cls:'fail', icon:'❌', msg:'<b>超出许用范围！t = '+t.toFixed(3)+' s > 0.30 s。</b>同步时间过长，换档品质差。建议增大 F、f 或 R，或减小 J<sub>t</sub>、α。'};
+}
+
+// ── Main compute ───────────────────────────────────────────────────────────
+function compute() {
+  var r = calcAll(P);
+  var vd = verdict(r.t);
+
+  // Key numbers
+  document.getElementById('r_Mm').textContent   = r.Mm.toFixed(3);
+  document.getElementById('r_dw').textContent   = r.dw.toFixed(2);
+  document.getElementById('r_t').textContent    = r.t >= 0 ? r.t.toFixed(3) : 'N/A';
+  document.getElementById('r_we').textContent   = r.we.toFixed(1);
+  document.getElementById('r_dir').textContent  = r.dw > 0 ? '升档 ↑' : (r.dw < 0 ? '降档 ↓' : '—');
+  var mar = r.t > 0 ? ((PASS_HI - r.t)/PASS_HI*100) : NaN;
+  document.getElementById('r_margin').textContent = isNaN(mar) ? '—' : mar.toFixed(1);
+
+  // Verdict
+  var vel = document.getElementById('verdict');
+  vel.className = 'verdict ' + vd.cls;
+  document.getElementById('v_icon').textContent = vd.icon;
+  document.getElementById('v_text').innerHTML   = vd.msg;
+
+  // Gauge (max 1.5s)
+  var MAX_T = 1.5;
+  var pct   = Math.min(Math.max(r.t / MAX_T * 100, 0), 100);
+  var gfill = document.getElementById('gauge_fill');
+  gfill.style.width = pct + '%';
+  var gc = r.t >= PASS_LO && r.t <= PASS_HI ? 'linear-gradient(90deg,#1a7a3c,#2ecc71)'
+         : r.t < PASS_LO ? 'linear-gradient(90deg,#d4a017,#f0c040)'
+         : 'linear-gradient(90deg,#c0392b,#e74c3c)';
+  gfill.style.background = gc;
+  gfill.textContent = r.t >= 0 ? r.t.toFixed(3)+' s' : '';
+  document.getElementById('g_label').textContent = 't = ' + (r.t>=0?r.t.toFixed(3):'N/A') + ' s';
+
+  // Process derivation
+  var R_m = P.R / 1000;
+  var grid = document.getElementById('proc_grid');
+  grid.innerHTML =
+    '<span>① ω<sub>e</sub> = '+P.ne+' × 2π/60</span><span class="res">= '+r.we.toFixed(2)+' rad/s</span>'+
+    '<span>② sin α = sin '+P.alpha+'°</span><span class="res">= '+r.sinA.toFixed(5)+'</span>'+
+    '<span>③ M<sub>m</sub> = F·f·R/sinα = '+P.F+'×'+P.f+'×'+R_m.toFixed(3)+'/'+r.sinA.toFixed(5)+'</span><span class="res hl">= '+r.Mm.toFixed(4)+' N·m</span>'+
+    '<span>④ Δω = ω<sub>e</sub>×(1/i<sub>k+1</sub>−1/i<sub>k</sub>) = '+r.we.toFixed(2)+'×(1/'+P.ik1+'−1/'+P.ik+')</span><span class="res">= '+r.dw.toFixed(4)+' rad/s</span>'+
+    '<span>⑤ t = J<sub>t</sub>×Δω / M<sub>m</sub> = '+P.Jt+'×'+r.dw.toFixed(4)+'/'+r.Mm.toFixed(4)+'</span><span class="res hl">= '+r.t.toFixed(4)+' s</span>'+
+    '<span>⑥ 乘用车高档许用范围</span><span class="res" style="color:var(--green)">0.15 ~ 0.30 s</span>';
+
+  // Sensitivity table
+  buildSensTable(r);
+
+  // Chart
+  drawChart();
+}
+
+// ── Sensitivity table ──────────────────────────────────────────────────────
+function buildSensTable(base) {
+  var rows = [];
+  // vary F
+  [60, 80, 100, 120, 150, 180, 200, 250, 300].forEach(function(v) {
+    var q = Object.assign({},P,{F:v});
+    var r2 = calcAll(q);
+    rows.push({param:'F (N)', val:v, Mm:r2.Mm, dw:r2.dw, t:r2.t, cur: Math.abs(v-P.F)<0.1});
+  });
+  // vary f
+  [0.07, 0.08, 0.10, 0.12, 0.15, 0.18].forEach(function(v) {
+    var q = Object.assign({},P,{f:v});
+    var r2 = calcAll(q);
+    rows.push({param:'f', val:v, Mm:r2.Mm, dw:r2.dw, t:r2.t, cur: Math.abs(v-P.f)<0.001});
+  });
+  // vary R
+  [15, 20, 25, 30, 35, 40, 45].forEach(function(v) {
+    var q = Object.assign({},P,{R:v});
+    var r2 = calcAll(q);
+    rows.push({param:'R (mm)', val:v, Mm:r2.Mm, dw:r2.dw, t:r2.t, cur: Math.abs(v-P.R)<0.1});
+  });
+
+  var html = '';
+  rows.forEach(function(row) {
+    var vd2 = verdict(row.t);
+    var tc  = vd2.cls === 'pass' ? 'pass' : (vd2.cls === 'warn' ? 'warn' : 'fail');
+    var cur = row.cur ? ' cur' : '';
+    var label = vd2.cls==='pass'?'✅ 满足': (vd2.cls==='warn'?'⚡ 偏短':'❌ 超限');
+    html += '<tr>';
+    html += '<td class="'+cur+'">'+row.param+'</td>';
+    html += '<td class="'+cur+'">'+row.val+'</td>';
+    html += '<td class="'+cur+'">'+row.Mm.toFixed(3)+'</td>';
+    html += '<td class="'+cur+'">'+row.dw.toFixed(3)+'</td>';
+    html += '<td class="'+tc+cur+'">'+row.t.toFixed(3)+'</td>';
+    html += '<td class="'+tc+cur+'">'+label+'</td>';
+    html += '</tr>';
+  });
+  document.getElementById('sensBody').innerHTML = html;
+}
+
+// ── Chart tabs ─────────────────────────────────────────────────────────────
+var TABS = [
+  {key:'F',   label:'F 对 t', min:30,   max:400, step:5,   unit:'N',     desc:'增大轴向力 F → Mm 增大 → t 减小（反比关系）'},
+  {key:'f',   label:'f 对 t', min:0.05, max:0.20,step:0.005,unit:'',    desc:'增大摩擦因数 f → Mm 增大 → t 减小（反比关系）；磨损使 f 下降会导致 t 增大'},
+  {key:'R',   label:'R 对 t', min:10,   max:60,  step:1,   unit:'mm',    desc:'增大锥面半径 R → Mm 增大 → t 减小（反比关系）'},
+  {key:'alpha',label:'α 对 t',min:5,    max:15,  step:0.5, unit:'°',     desc:'α 越小 → sinα 越小 → Mm 越大 → t 越短；但α过小接近自锁'},
+  {key:'ne',  label:'ωe 对 t',min:800,  max:5000,step:50,  unit:'rpm',   desc:'发动机转速 ωe 越高 → Δω 越大 → t 越长（正比关系）'},
+  {key:'Jt',  label:'Jt 对 t',min:0.01, max:0.10,step:0.001,unit:'kg·m²',desc:'转动惯量 Jt 越大 → t 越长（正比关系）；轻量化设计可缩短同步时间'},
+  {key:'ik',  label:'i₃ 对 t',min:1.0,  max:4.0, step:0.05,unit:'',     desc:'当前档传动比 ik 越大 → 速度差 Δω 越大 → t 越长'},
+  {key:'ik1', label:'i₄ 对 t',min:0.6,  max:3.5, step:0.05,unit:'',     desc:'目标档传动比 ik+1 越小（超速档方向）→ Δω 越大 → t 越长'},
+];
+
+function buildTabs() {
+  var html='';
+  TABS.forEach(function(t,i){
+    html+='<div class="tab'+(i===0?' active':'')+'" onclick="switchTab('+i+')">'+t.label+'</div>';
+  });
+  document.getElementById('tabRow').innerHTML=html;
+}
+
+function switchTab(i) {
+  TAB=i;
+  var tabs=document.querySelectorAll('.tab');
+  tabs.forEach(function(t,j){t.className='tab'+(j===i?' active':'');});
+  drawChart();
+}
+
+// ── Canvas chart ───────────────────────────────────────────────────────────
+function drawChart() {
+  var cfg = TABS[TAB];
+  var canvas = document.getElementById('mainChart');
+  var W = canvas.parentElement.clientWidth - 36;
+  canvas.width = W; canvas.height = 270;
+  var ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,W,270);
+
+  // Generate data
+  var steps=100;
+  var range=cfg.max-cfg.min;
+  var xs=[], ys=[];
+  for(var i=0;i<=steps;i++){
+    var xv=cfg.min+range*i/steps;
+    xs.push(xv);
+    var q=Object.assign({},P);
+    q[cfg.key]=xv;
+    var r2=calcAll(q);
+    ys.push(r2.t);
+  }
+
+  var pad={top:36,right:18,bottom:44,left:58};
+  var cw=W-pad.left-pad.right, ch=270-pad.top-pad.bottom;
+
+  // y range
+  var yMin=0, yMax=Math.max.apply(null,ys)*1.15;
+  yMax=Math.max(yMax,0.5);
+
+  function px(xv){return pad.left+(xv-cfg.min)/range*cw;}
+  function py(yv){return pad.top+(1-(yv-yMin)/(yMax-yMin))*ch;}
+
+  // Grid
+  for(var gi=0;gi<=5;gi++){
+    var gv=yMin+(yMax-yMin)*gi/5;
+    var gy=py(gv);
+    ctx.strokeStyle='#e0e8ef';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(pad.left,gy);ctx.lineTo(pad.left+cw,gy);ctx.stroke();
+    ctx.fillStyle='#8fa3b5';ctx.font='11px sans-serif';ctx.textAlign='right';
+    ctx.fillText(gv.toFixed(2)+' s',pad.left-5,gy+4);
+  }
+  for(var xi=0;xi<=6;xi++){
+    var xv2=cfg.min+range*xi/6;
+    var gx=px(xv2);
+    ctx.strokeStyle='#e0e8ef';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(gx,pad.top);ctx.lineTo(gx,pad.top+ch);ctx.stroke();
+    ctx.fillStyle='#8fa3b5';ctx.font='11px sans-serif';ctx.textAlign='center';
+    ctx.fillText(xv2.toFixed(cfg.step<0.01?3:cfg.step<1?2:0),gx,pad.top+ch+16);
+  }
+
+  //허용 band [0.15, 0.30] — green shading
+  if(PASS_LO>=yMin && PASS_LO<=yMax){
+    var y_hi=py(PASS_HI), y_lo=py(PASS_LO);
+    ctx.fillStyle='rgba(26,122,60,0.10)';
+    ctx.fillRect(pad.left,y_hi,cw,y_lo-y_hi);
+    ctx.strokeStyle='rgba(26,122,60,0.5)';ctx.lineWidth=1.2;ctx.setLineDash([5,3]);
+    ctx.beginPath();ctx.moveTo(pad.left,y_hi);ctx.lineTo(pad.left+cw,y_hi);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(pad.left,y_lo);ctx.lineTo(pad.left+cw,y_lo);ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='rgba(26,122,60,0.75)';ctx.font='bold 10.5px sans-serif';ctx.textAlign='left';
+    ctx.fillText('0.30 s（许用上限）',pad.left+4,y_hi-3);
+    ctx.fillText('0.15 s（许用下限）',pad.left+4,y_lo-3);
+  }
+
+  // Main curve (gradient color by t)
+  for(var ci=0;ci<xs.length-1;ci++){
+    var t1=ys[ci], t2=ys[ci+1];
+    var avg=(t1+t2)/2;
+    var col = avg>=PASS_LO&&avg<=PASS_HI ? '#1a7a3c' : avg<PASS_LO ? '#d4a017' : '#c0392b';
+    ctx.strokeStyle=col; ctx.lineWidth=2.8;
+    ctx.beginPath();
+    ctx.moveTo(px(xs[ci]),  py(t1));
+    ctx.lineTo(px(xs[ci+1]),py(t2));
+    ctx.stroke();
+  }
+
+  // Current value marker
+  var curX=P[cfg.key];
+  var curQ=Object.assign({},P); curQ[cfg.key]=curX;
+  var curT=calcAll(curQ).t;
+  if(curX>=cfg.min&&curX<=cfg.max){
+    ctx.strokeStyle='rgba(212,105,30,0.7)';ctx.lineWidth=1.8;ctx.setLineDash([3,2]);
+    ctx.beginPath();ctx.moveTo(px(curX),pad.top);ctx.lineTo(px(curX),pad.top+ch);ctx.stroke();
+    ctx.setLineDash([]);
+    // dot
+    ctx.fillStyle='#d4691e';
+    ctx.beginPath();ctx.arc(px(curX),py(curT),7,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#fff';
+    ctx.beginPath();ctx.arc(px(curX),py(curT),3,0,Math.PI*2);ctx.fill();
+    // label
+    ctx.fillStyle='#d4691e';ctx.font='bold 11.5px sans-serif';ctx.textAlign='center';
+    var lx=px(curX), ly=py(curT)-14;
+    if(lx>W-80) lx=W-70;
+    ctx.fillText(curT.toFixed(3)+' s',lx,ly);
+  }
+
+  // Axes
+  ctx.strokeStyle='#8fa3b5';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(pad.left,pad.top);ctx.lineTo(pad.left,pad.top+ch);
+  ctx.lineTo(pad.left+cw,pad.top+ch);ctx.stroke();
+
+  // Labels
+  ctx.fillStyle='#374a5c';ctx.font='bold 12px sans-serif';ctx.textAlign='center';
+  ctx.fillText(cfg.label.split(' 对 ')[0]+(cfg.unit?' ('+cfg.unit+')':''),pad.left+cw/2,270-6);
+  ctx.save();ctx.translate(14,pad.top+ch/2);ctx.rotate(-Math.PI/2);
+  ctx.fillText('同步时间 t (s)',0,0);ctx.restore();
+
+  // Title
+  ctx.fillStyle='#1a3a5c';ctx.font='bold 13px sans-serif';ctx.textAlign='center';
+  ctx.fillText(cfg.label.split(' 对 ')[0]+' 对同步时间 t 的影响',pad.left+cw/2,pad.top-12);
+
+  // Legend
+  ctx.font='10.5px sans-serif';ctx.textAlign='left';ctx.fillStyle='#1a7a3c';
+  ctx.fillRect(pad.left,pad.top+ch+26,14,3);
+  ctx.fillText('满足范围(0.15~0.30s)',pad.left+18,pad.top+ch+30);
+  ctx.fillStyle='#c0392b';
+  ctx.fillRect(pad.left+170,pad.top+ch+26,14,3);
+  ctx.fillText('超限',pad.left+188,pad.top+ch+30);
+  ctx.fillStyle='#d4a017';
+  ctx.fillRect(pad.left+220,pad.top+ch+26,14,3);
+  ctx.fillText('偏短',pad.left+238,pad.top+ch+30);
+  ctx.fillStyle='#d4691e';
+  ctx.beginPath();ctx.arc(pad.left+290,pad.top+ch+28,5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#374a5c';
+  ctx.fillText('当前值',pad.left+298,pad.top+ch+32);
+
+  document.getElementById('chartNote').textContent=cfg.desc;
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+buildTabs();
+window.addEventListener('resize',function(){drawChart();});
+compute();
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+if (e.key === 'F12' || 
+(e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+(e.ctrlKey && e.key === 'U') ||
+(e.ctrlKey && e.key === 'S')) {
+e.preventDefault();
+return false;
+}
+});
+
+</script>
+<script>
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('keydown', e => {
+    if (e.key === 'F12' || 
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+        (e.ctrlKey && e.key === 'U') ||
+        (e.ctrlKey && e.key === 'S')) {
+      e.preventDefault();
+      return false;
+    }
+  });
+</script>
+
+</body>
+</html>
